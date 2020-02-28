@@ -1,0 +1,214 @@
+---
+title: "XiangyunLiao_631_HW01"
+output: word_document
+---
+Having a brief idea about how the data look like.
+```{r}
+dat = read.csv("~/Desktop/631STAT in Fin/datasets/Stock_bond.csv", header = TRUE)
+head(names(dat),n=20)
+attach(dat)
+plot(GM_AC,type = "l")
+plot(F_AC, type = "l")
+```
+
+##**Problem 1：**
+GM and Ford returns show positively correlated.
+"Yes",there are several outlying returens,and both of them having outlying number simultaneously in either positive returens or negative ones.
+```{r}
+n = dim(dat)[1]
+GMReturn = GM_AC[2:n]/GM_AC[1:(n-1)] - 1
+FReturn = F_AC[2:n]/F_AC[1:(n-1)] - 1
+par(mfrow = c(1, 1))
+plot(GMReturn,FReturn,type = "p",cex=0.25)
+abline(lm(FReturn~GMReturn))
+cor(FReturn,GMReturn)
+```
+##**Problem 2：**
+The correlation between the return of GM and the log return of GM is 0.9995408,really close to ero,which means taking log dose not chang the relationship of the data. 
+```{r}
+logGMReturn<- log(GMReturn+1)
+plot(logGMReturn,GMReturn,type = "p",cex=0.35)
+cor(logGMReturn,GMReturn)
+```
+##**Problem 3：**
+```{r,include=FALSE}
+library(quantmod)
+options("getSymbols.warning4.0"=FALSE)
+```
+
+```{r}
+getSymbols("MSFT",from = "2009-08-01", to = "2019-08-01")
+getSymbols("MRK",from = "2009-08-01", to = "2019-08-01")
+plot(cbind(Ad(MSFT),Ad(MRK)), legend.loc = "topleft")
+MSFTReturn<-dailyReturn(MSFT,type = "arithmetic")
+MRKReturn<-dailyReturn(MRK,type = "arithmetic")
+MSFTReturn_v <- c(t(MSFTReturn[1:nrow(MSFTReturn),1]))
+MRKReturn_v  <- c(t(MRKReturn[1:nrow(MRKReturn),1]))
+log.MSFTReturn<- log(MSFTReturn_v+1)
+log.MRKReturn<- log(MRKReturn_v+1)
+```
+Stock Microsoft and Merck dose not have strong positive correlation and they almost don't have simultaneously outlying returens.They still have positive correlation but not high.
+```{r}
+plot(MSFTReturn_v,MRKReturn_v,cex=0.25)
+cor(MSFTReturn_v,MRKReturn_v)
+abline(lm(MRKReturn_v~MSFTReturn_v))
+```
+Following is the returns for MSFT versus its log reture with their correlation
+```{r}
+plot(MSFTReturn_v,log.MSFTReturn,cex=0.5)
+abline(lm(log.MSFTReturn~MSFTReturn_v),col="blue")
+cor(MSFTReturn_v,log.MSFTReturn)
+```
+Following is the returns for MRK versus its log reture with their correlation
+```{r}
+plot(MRKReturn_v,log.MRKReturn,cex=0.5)
+abline(lm(log.MRKReturn~MRKReturn_v),col="blue")
+cor(MRKReturn_v,log.MRKReturn)
+```
+
+##**Problem 4：**
+The probability that the value of the stock will be below $950,000 at the close of at least one of the next 45 trading days:50.99%
+```{r}
+niter = 1e5 # number of iterations
+below = rep(0, niter) # set up storage
+set.seed(2009)
+for (i in 1:niter)
+{
+   r = rnorm(45, mean = 0.05/253,
+      sd = 0.23/sqrt(253)) # generate random numbers
+   logPrice = log(1e6) + cumsum(r)
+    minlogP = min(logPrice) # minimum price over next 45 days
+   below[i] = as.numeric(minlogP < log(950000))
+}
+mean(below)
+```
+
+
+
+##**Problem 9：**
+In this simulation, the mean of the log-returns for 1 year is 0.09601128 and standard deviation of the log-returns for 1 year is 0.1890347
+```{r, fig.height=8}
+set.seed(2012)
+n=253
+par(mfrow=c(3,3))
+for (i in (1:9))
+{
+ logr = rnorm(n, 0.05 / 253, 0.2 / sqrt(253))
+ price = c(120, 120 * exp(cumsum(logr)))
+ plot(price, type = "l")
+ abline(h=120,col="red")
+}
+ mean(logr)*253;sd(logr)*sqrt(253)
+```
+
+
+##**Problem 10：**
+Base on the figures from Problem 9 ,we can see the price series shows short-term momentum which short-run serial correlations are not zero. But because of the i.i.d. normal assumption,we know the next period price should be non-forecastable,which means the appearance of momentum is an illusion.
+
+##**Problem 11：**
+code:(price<-c(120, 120 * exp(cumsum(logr)))
+This code equals the random walk model: 
+$$S_t=S_0+\sum_{s=1}^{t} Z_s$$ 
+$S_0=120$ and 120*exp(cumsum(logr)) is cumulatived after each cycle
+
+##**Problem 12：**
+```{r McD stock Price}
+data = read.csv("~/Desktop/631STAT in Fin/datasets/MCD_PriceDaily.csv") 
+head(data)
+adjPrice = data[, 7]
+```
+
+For the plot shows the linear relationship between the returns and log returns approximately equal because we are computing both of then by short time period, which is daily.$r_t=log(1+R_t)\approx R_t$ for small |t| by Taylor expansion.
+```{r McD stock Return}
+n <- length(adjPrice)
+McDreturn <- rep(0,n)
+for (i in (1:n))
+  {McDreturn[i] <-(adjPrice[i+1]/adjPrice[i]-1)
+}
+log.McDreturn <- log(McDreturn+1)
+plot(McDreturn,log.McDreturn,cex=0.35)
+abline(lm(log.McDreturn~McDreturn),col="blue")
+```
+
+##**Problem 13：**
+Compare the first moment of the returen and its log-return ,the two results very close to each other. And the second moment of these two type of daily seems have approximately equal result, perform very contant.It is reasonable to have them same,at sort term run have kept the inner relation after taking log on it.
+```{r}
+mean(McDreturn[1:n-1]);mean(log.McDreturn[1:n-1])
+sd(McDreturn[1:n-1]);sd(log.McDreturn[1:n-1])
+plot(c(1:1176),McDreturn[1:n-1],type = "l")
+abline(h=mean(McDreturn[1:n-1]),col="red")
+abline(h=mean(McDreturn[1:n-1])+sd(McDreturn[1:n-1]),col="maroon")
+abline(h=mean(McDreturn[1:n-1])-sd(McDreturn[1:n-1]),col="maroon")
+plot(c(1:1176),log.McDreturn[1:n-1],type = "l",col="darkgray")
+abline(h=mean(log.McDreturn[1:n-1]),col="red")
+abline(h=mean(log.McDreturn[1:n-1])+sd(log.McDreturn[1:n-1]),col="maroon")
+abline(h=mean(log.McDreturn[1:n-1])-sd(log.McDreturn[1:n-1]),col="maroon")
+```
+
+##**Problem 14：**
+t-test to compare the means of the returns and the log returns is paired-samples t-test.Null hypothesis: true difference in means is equal to 0 and the p-value of this test is 0.9139,which means we failed to reject the null hypothesis. I think they are met in this example.
+```{r}
+t.test(McDreturn[1:n-1],log.McDreturn[1:n-1],conf.level = 0.95)
+```
+
+##**Problem 15：**
+After looking at return and log return data for McDonald’s by plot and hypothesis test,we can say log returns and returns are interchangeable at small values.
+
+##**Problem 17：**
+I will not make this bet, because of the low probability of the occur make the expect return is negative.
+```{r}
+n = 1e5 
+below = rep(0, n) 
+set.seed(2015)
+for (i in 1:n)
+{
+   r = rnorm(20, mean = 0.0004630553,
+      sd = 0.008901467)
+   logPrice = log(93.7) + cumsum(r)
+    minlogP = min(logPrice) 
+   below[i] = as.numeric(minlogP < log(84.5))
+}
+mean(below)
+profit <- mean(below)*125+(1-mean(below))*(-1)
+print(profit)
+```
+
+##**Exercises Questions 1(a):**
+The probability that after one trading day your investment is
+worth less than $990 is 23.066%
+$$logP_t=logP_0+r$$ r~Normal(0.001,0.000225)
+$$r=logP_t-logP_0$$
+```{r}
+pnorm((log(990)-log(1000)),0.001,0.015)
+```
+Following is using simulation to generate result:
+```{r}
+n <- 1e5
+r <- rep(0,n)
+below <- rep(0,n)
+for (i in 1:n)
+{
+   r[i]= rnorm(1, mean = 0.001,sd = 0.015)
+   logPrice[i] = log(1000) + r[i]
+   below[i] = as.numeric(logPrice[i] < log(990))
+}
+prob<- sum(below)/n
+print(prob)
+```
+
+##**Exercises Questions 1(b):**
+After 5 days is the sum of five i.i.d daily log return, which follow the normall distribution N(0.005,0.001125) 
+The probability that after five trading days your investment is worth less than $990 is 32.682%
+```{r}
+pnorm((log(990)-log(1000)),0.005,sqrt(0.001125))
+```
+
+##**Exercises Questions 4:**
+$$r_t(k)=log[1+R_t(k)]=r_t+...+r_{t-k+1}$$
+P1 =95,P2 =103, and P3 = 98 
+$$r_3(2)=r_3+r_2
+        =log(P_3/P_2)+log(P_2/P_1)
+        =0.03109101$$
+
+
+
