@@ -1,0 +1,286 @@
+---
+title: "HW02_XiangyunLiao"
+output: word_document
+---
+
+## Files prep:
+<br/>
+```{r ,warning =FALSE}
+library(quantmod)
+options("getSymbols.yahoo.warning"=FALSE)
+getSymbols("^GSPC",from = "1991-01-01",to = "2020-01-01")
+getSymbols("^IXIC",from = "1991-01-01",to = "2020-01-01")
+getSymbols("CSCO",from = "1991-01-01",to = "2020-01-01")
+getSymbols("C",from = "1991-01-01",to = "2020-01-01")
+getSymbols("CVX",from = "1991-01-01",to = "2020-01-01")
+save.image(file = "~/Desktop/631STAT in Fin/HW02/HW02Data.Rdata")
+```
+
+## Questions 1:
+
+From the following time series plot of the adjusted price and daily adjusted log reture of both NASDAQ composite and S&P500 has similar trend and volatility simutaniously during specified period but not exactly same.They all exhibit stationarity on their return while the broad market value growing.
+
+Both of these two indices exhibit high volatility around 1998 because of a global financial crisis. We know the dot-com bubble of 1997-2000 following with dot-com collapse during 2000-2002. However the peak of GSPC is more flater than NASDAQ index because NASDAQ is heavily weighted towards information technology companies while the volatility of broad market index S&P500 be smoothed out.
+
+The volatility clusterings apparent in plots of daily adjusted log reture on both NASDAQ and S&P500.During this crisis the proportion of dropping on S&P500 is higher then NASDAQ. The response to the 2001 recession set the stage for the 2008 financial crisis. The Fed continued lowering interest rates through 2003. That forced banks to earn less revenue. They looked for other sources, such as mortgage-backed securities and other derivatives. When the Fed began raising rates in 2004, many mortgage-holders had trouble paying the higher rates.The US Financial crisis at 2007-2009 became a global one showed a widly impact on global market either on index highly concentrated on one sector or more diversified.  
+```{r, echo=FALSE}
+par(mfrow = c(2, 1))
+plot(Ad(GSPC),main = "Adjusted Price of GSPC")
+plot(dailyReturn(Ad(GSPC), type = "log"),main = "Ad Daily log-returen of GSPC")
+
+par(mfrow = c(2, 1))
+plot(Ad(IXIC),main = "Adjusted Price of IXIC")
+plot(dailyReturn(Ad(IXIC), type = "log"),main = "Ad Daily log-returen of IXIC")
+
+```
+
+## Questions 2(a):
+
+Since the sources and properties of each economic crisis is vary, different sector be effected as different levels. 
+
+Citigroup as a financial institution in the U.S. has highly relationship with local and global financial market movement.  
+Year 1988 Citigroup merger with Travelers (NYSE:TRV) created a company with nearly $700 billion in total assets. It sought to become a diversified financial services giant growing more valuable while the dot-com bubble. After the collapse at 2000-2002,because extreme volatility in financial results stemming from catastrophic loss events had a negative impact on the entire company,Citigroup spun off Travelers at 2002.For a while, the housing boom from 2003 gave Citi the chance to recover from the earlier years, also brought crisis around 2008 lead Citi almost bankrupt.
+```{r, echo=FALSE}
+par(mfrow = c(2, 1))
+plot(Ad(C),main = "Ad Daily log-returen of Citigroup")
+plot(dailyReturn(Ad(C), type = "log"),main = "Ad Daily log-returen of Citigroup")
+```
+
+Cisco Inc. is an American multinational technology conglomerate. Because of its characteristics, Cisco's stock price trend should be very close to NASDAQ, which is heavily weighted towards information technology companies. Cisco's share gain with dot-com bubble,and drop with dot-com collapse. During financial crisis around 2008, as a tech company in order to stable its market value Cisco finished a series activities ,like: rebranding ,aquisition and cut employees at 2006-2011, which not influenced big as financial institutions.
+```{r, echo=FALSE}
+par(mfrow = c(2, 1))
+plot(Ad(CSCO),main = "Ad Daily log-returen of Cisco Systems")
+plot(dailyReturn(Ad(CSCO), type = "log"),main = "Ad Daily log-returen of Cisco Systems")
+```
+
+Chevron as an Energy driven company in the U.S. perform continuous growing in a long period. During those major economic crises, this company only impacted (clustered volatility) by the global financial crisis happened on 2008 because of the price reduction of the per-barrel in crude.
+```{r, echo=FALSE}
+par(mfrow = c(2, 1))
+plot(Ad(CVX),main = "Ad Daily log-returen of Chevron Corp")
+plot(dailyReturn(Ad(CVX), type = "log"),main = "Ad Daily log-returen of Chevron Corp")
+```
+
+### Questions 2(b,c):
+
+For daily return, all three companies exhibit totally non-normal. After sum data by week, company Citigroup and Cisco still have longer tail, while the Chevron's weekly return is close to normal distribution. Because of the central limit theorem all companies' monthly data very like normal distribution, which means partially follow normal with slightly left skew.  
+```{r, echo=FALSE}
+Rt.C = list(Daily = dailyReturn(Ad(C), type = "log"),                ###Banking
+                   Weekly = weeklyReturn(Ad(C), type = "log"),
+                   Monthly = monthlyReturn(Ad(C), type = "log"))
+Rt.CSCO = list(Daily = dailyReturn(Ad(CSCO), type = "log"),          ###Tech
+                   Weekly = weeklyReturn(Ad(CSCO), type = "log"),
+                   Monthly = monthlyReturn(Ad(CSCO), type = "log"))
+Rt.CVX = list(Daily = dailyReturn(Ad(CVX), type = "log"),            ###Oil & gas
+                   Weekly = weeklyReturn(Ad(CVX), type = "log"),
+                   Monthly = monthlyReturn(Ad(CVX), type = "log"))
+```
+
+## Citigroup:
+
+```{r, fig.width = 7, fig.asp = 0.8, echo=FALSE}
+par(mfrow = c(2,3))
+  hist(Rt.C$Daily,breaks = "scott", freq = F,xlim = c(-0.2,0.2),col = "skyblue3",border = "royalblue3",main = "Citigroup (Daily)",xlab = "Daily Return")
+  hist(Rt.C$Weekly,breaks = "scott", freq = F,xlim = c(-0.4,0.4),col = "skyblue3",border = "royalblue3",main = "Citigroup (Weekly)",xlab = "Weekly Return")
+  hist(Rt.C$Monthly,breaks = "scott", freq = F,xlim = c(-1,1),col = "skyblue3",border = "royalblue3",main = "Citigroup (Monthly)",xlab = "Monthly Return")
+
+  qqnorm(Rt.C$Daily,col = "skyblue3",main = "Nomality Prob (Daily)",ylab = "Daily Return")
+  qqline(Rt.C$Daily,col="royalblue3")
+  qqnorm(Rt.C$Weekly,col = "skyblue3",main = "Nomality Prob (Weekly)",ylab = "Weekly Return")
+  qqline(Rt.C$Weekly,col="royalblue3")
+  qqnorm(Rt.C$Monthly,col = "skyblue3",main = "Nomality Prob (Monthly)",ylab = "Monthly Return")
+  qqline(Rt.C$Monthly,col="royalblue3")
+```
+
+### Cisco:
+
+```{r, fig.width = 7, fig.asp = 0.8, echo=FALSE}
+par(mfrow = c(2,3))
+  hist(Rt.CSCO$Daily,breaks = "scott", freq = F,xlim = c(-0.2,0.2),col = "skyblue3",border = "royalblue3",main = "Cisco (Daily)",xlab = "Daily Return")
+  hist(Rt.CSCO$Weekly,breaks = "scott", freq = F,xlim = c(-0.4,0.4),col = "skyblue3",border = "royalblue3",main = "Cisco (Weekly)",xlab = "Weekly Return")
+  hist(Rt.CSCO$Monthly,breaks = "scott", freq = F,xlim = c(-0.5,0.5),col = "skyblue3",border = "royalblue3",main = "Cisco (Monthly)",xlab = "Monthly Return")
+
+  qqnorm(Rt.CSCO$Daily,col = "skyblue3",main = "Nomality Prob (Daily)",ylab = "Daily Return")
+  qqline(Rt.CSCO$Daily,col="royalblue3")
+  qqnorm(Rt.CSCO$Weekly,col = "skyblue3",main = "Nomality Prob (Weekly)",ylab = "Weekly Return")
+  qqline(Rt.CSCO$Weekly,col="royalblue3")
+  qqnorm(Rt.CSCO$Monthly,col = "skyblue3",main = "Nomality Prob (Monthly)",ylab = "Monthly Return")
+  qqline(Rt.CSCO$Monthly,col="royalblue3")
+```
+
+### Chevron:
+
+```{r, fig.width = 7, fig.asp = 0.8, echo=FALSE}
+par(mfrow = c(2,3))
+  hist(Rt.CVX$Daily,breaks = "scott", freq = F,xlim = c(-0.2,0.2),col = "skyblue3",border = "royalblue3",main = "Chevron (Daily)",xlab = "Daily Return")
+  hist(Rt.CVX$Weekly,breaks = "scott", freq = F,xlim = c(-0.4,0.4),col = "skyblue3",border = "royalblue3",main = "Chevron (Weekly)",xlab = "Weekly Return")
+  hist(Rt.CVX$Monthly,breaks = "scott", freq = F,xlim = c(-0.5,0.5),col = "skyblue3",border = "royalblue3",main = "Chevron (Monthly)",xlab = "Monthly Return")
+
+  qqnorm(Rt.CVX$Daily,col = "skyblue3",main = "Nomality Prob (Daily)",ylab = "Daily Return")
+  qqline(Rt.CVX$Daily,col="royalblue3")
+  qqnorm(Rt.CVX$Weekly,col = "skyblue3",main = "Nomality Prob (Weekly)",ylab = "Weekly Return")
+  qqline(Rt.CVX$Weekly,col="royalblue3")
+  qqnorm(Rt.CVX$Monthly,col = "skyblue3",main = "Nomality Prob (Monthly)",ylab = "Monthly Return")
+  qqline(Rt.CVX$Monthly,col="royalblue3")
+```
+
+## Questions 2(d):
+
+
+###Skewness and Kurtosis
+
+
+|            |Citigroup| Cisco |Chevron|
+|-----------:|--------:|------:|------:|
+| Skew/Day   |  -0.47  | -0.08 | 0.085 |
+| Skew/Week  |  -1.47  | -0.36 | -0.83 |
+| Skew/Month |  -1.69  | -0.48 | -0.11 |
+| Kur/ Day   |  44.72  |  9.90 | 11.59 |
+| Kur/ Week  |  59.36  |  6.58 | 10.45 |
+| Kur/ Month |  15.22  |  4.86 |  3.49 |
+
+
+###Shapiro-Wilk test and Jarque-Bera tests
+
+
+
+|  Daily Data  |       Citigroup      |         Cisco          |        Chevron         |
+|-------------:|---------------------:|-----------------------:|-----------------------:|
+|Jarque-Bera |JB=5.3e6;p-value<2.2e-16|JB=1.4e5;p-value<2.2e-16|JB=2.3e5;p-value<2.2e-16|
+|  Weekly Data |                      |                        |                        |
+|-------------:|---------------------:|-----------------------:|-----------------------:|
+|Shapiro.test|W=0.716;p-value<2.2e-16 |W=0.957;p-value<2.2e-16 | W=0.961;p-value<2.2e-16|
+|Jarque-Bera |JB=2e6;p-value<2.2e-16  | JB=830;p-value<2.2e-16 | JB=3735;p-value<2.2e-16|
+| Monthly Data |                      |                        |                        |
+|-------------:|---------------------:|-----------------------:|-----------------------:|
+|Shapiro.test|W=0.856;p-value<2.2e-16 | W=0.977;p-value=2.5e-5 |W=0.992;**p-value=0.0674**|
+|Jarque-Bera |JB=2323;p-value<2.2e-16 | JB=62;p-value=3.9e-14  |JB=5.21;**p-value=0.074** |
+
+```{r,echo=FALSE}
+#kurtosis(Rt.C$Daily);kurtosis(Rt.C$Weekly);kurtosis(Rt.C$Monthly)
+#kurtosis(Rt.CSCO$Daily);kurtosis(Rt.CSCO$Weekly);kurtosis(Rt.CSCO$Monthly)
+#kurtosis(Rt.CVX$Daily);kurtosis(Rt.CVX$Weekly);kurtosis(Rt.CVX$Monthly)
+
+#skewness(Rt.C$Daily);skewness(Rt.C$Weekly);skewness(Rt.C$Monthly)
+#skewness(Rt.CSCO$Daily);skewness(Rt.CSCO$Weekly);skewness(Rt.CSCO$Monthly)
+#skewness(Rt.CVX$Daily);skewness(Rt.CVX$Weekly);skewness(Rt.CVX$Monthly)
+
+#shapiro.test(as.vector(weeklyReturn(C,type = "log")))
+#shapiro.test(as.vector(weeklyReturn(CSCO,type = "log")))
+#shapiro.test(as.vector(weeklyReturn(CVX,type = "log")))
+
+#shapiro.test(as.vector(monthlyReturn(C,type = "log")))
+#shapiro.test(as.vector(monthlyReturn(CSCO,type = "log")))
+#shapiro.test(as.vector(monthlyReturn(CVX,type = "log")))
+
+#jarque.test(as.vector(dailyReturn(C,type = "log")))
+#jarque.test(as.vector(dailyReturn(CSCO,type = "log")))
+#jarque.test(as.vector(dailyReturn(CVX,type = "log")))
+
+#jarque.test(as.vector(weeklyReturn(C,type = "log")))
+#jarque.test(as.vector(weeklyReturn(CSCO,type = "log")))
+#jarque.test(as.vector(weeklyReturn(CVX,type = "log")))
+
+#jarque.test(as.vector(monthlyReturn(C,type = "log")))
+#jarque.test(as.vector(monthlyReturn(CSCO,type = "log")))
+#jarque.test(as.vector(monthlyReturn(CVX,type = "log")))
+```
+
+###Summary:
+These statistics supply the same conclusions as plots from part(b).
+
+**Citigroup:**the distribution of the financial institute is negative skew (Asymmetry) at daily return and getting more skewed when compute returen by sum as weekly and monthly. Compare with normal ditribution, its kurtosis keep at very high number on histogram and Q-Q plots.We can say all 3 kinds of computed ways all have higher peak than normal distribution. This result appears the same between two different nomality tests, p-value extremely small, which strong reject null hypothesis. 
+
+**Cisco:**this tech company's return getting more skewed after sumed together more data. Skewness number keep negative and slightly more deviated from zero(Asymmetry). At the same time its kurtosis number getting more and more close to 3, which means the peakness of its distribution turn to flat and tail part become shorter. These results the same as shapiro test and JB test. 
+
+**Chevron:**from the previous analysis we know this energy driven company should have differently characteristics on its distribution. Its daily return is close to symmetic but high peak with heavy tail. And its weekly return tend to be negative skewed with flatter peak. However its monthly return acquire a skewness close to zero and kurtosis close to 3, which means the distribution now can be regard as a normal distribution. These computation results consistent with shapiro test and JB test. 
+
+## Questions 3:
+
+*Problem 4:What does the code q.grid = (1:n)/(n+1) do? What does qt(q.grid, df = df[j]) do? What does paste do?*
+```{r}
+logR<- as.vector(dailyReturn(Ad(GSPC), type = "log"))
+n=length(logR)
+q_grid=(1:n)/(n+1)
+df_grid = c(2:7)
+#index.names = dimnames(logR)[[2]]
+par(mfrow = c(2,3)) 
+  for (df in df_grid)
+  {
+    qqplot(logR, qt(q_grid,df),main = paste( " df = ", df) )
+    abline(lm(qt(c(0.25, 0.75), df = df) ~ quantile(logR, c(0.25, 0.75))))
+  } 
+```
+*q.grid=(1:n)/(n+1)* <= Generating a sample quantile, using n+1 bucause t distribution has positive and negative infinite.
+
+*qt(q.grid, df = df[j])*  <= Generating t distribution base on sample quantile with degree of freedom from 2 to 7
+
+*paste* <= combine characters with vectors, make them show up as title of those plots
+
+*Problem 5:For the SNP index, state which choice of the df gives the best-fitting t-distribution and explain why.*
+From the 6 plots above, we can observe at df equal 3, index data fit the t distribution quantile the best, data exhibits as a straight line.  
+
+## Questions 4:
+
+*Problem 6:Do either of the parametric models provide a reasonably good fit to the first index? Explain.*
+Compare with the other 5 degree of fredom I used ,df=3 is a appropriated models that can provide a reasonably good fit. Especially the tail part, perform a good fit.
+
+```{r, echo=FALSE}
+library("fGarch")
+x=seq(-0.1, 0.1,by = 0.001)
+par(mfrow = c(1, 1)) 
+df=3  ##<=#############
+mad_t = mad(logR,constant = sqrt(df / (df - 2)) / qt(0.75, df))
+plot(density(logR), lwd = 2, ylim = c(0, 60), main="Kernel Density estimate of SNP 500 Daily Return")
+lines(x, dstd(x, mean = mean(logR), sd = mad_t, nu = df),
+   lty = 5, lwd = 2, col = "red")
+lines(x, dnorm(x, mean = mean(logR), sd = sd(logR)),
+   lty = 3, lwd = 4, col = "blue")
+legend("topleft", c("SNP 500", paste("t: df = ",df), "normal"),
+   lwd = c(2, 2, 4), lty = c(1, 5, 3),
+   col = c("black", "red", "blue"))
+```
+
+
+*Problem 7:Which bandwidth selector is used as the default by density? What is the default kernel?*
+*Bandwidth = 0.001106164 * 
+*Default kernel is "gaussian"*
+
+
+## Questions 5:
+
+*Exercises 3:Show that $f^{'}(y|\xi)$ integrates to $\frac{\xi+\xi^{-1}}{2}$ *
+$$f^{*}(y|\xi )=\left\{\begin{matrix}
+f(y\xi ) , y<0\\
+f(y/\xi ), y\geq 0 
+\end{matrix}\right.$$
+
+f(y) as a pdf has integrate equal to 1 at whole area.
+
+$$y<0, \int_{-\infty }^{0} f(y\xi) = \xi \int_{-\infty }^{0} f(y) = \frac{1}{2}\xi$$
+$$y\geq 0, \int_{0}^{+\infty } f(y/\xi) = 1/\xi \int_{0}^{+\infty } f(y) = \frac{1}{2\xi}$$
+$$\frac{\xi}{2}+\frac{1}{2\xi} = \frac{\xi^{2}+1}{2\xi} = \frac{\xi+\xi^{-1}}{2}$$
+
+*Exercises 5(a):What is the kurtosis of a normal mixture distribution that is 95% N(0, 1) and 5 % N(0, 10)?*
+kurtosis of this mixture is 8.489893
+
+*Exercises 5(b):Find a formula for the kurtosis of a normal mixture distribution that is 100p% N(0, 1) and 100(1 − p)% N(0, σ^2), where p and σ are parameters. Your formula should give the kurtosis as a function of p and σ.*
+
+Y is a scale mixture of N(0, 1) and N(0, σ^2) with weights p and 1-p, 0<p<1. Then $E(Y) = 0 , Var(Y) = p\sigma _{1}^{2} + (1-p)\sigma _{2}^{2} = p+(1-p)\sigma^{2}$.Thus, 
+
+$$Kur_Y = \frac{E(Y^4)}{E^2(Y^2)} = \frac{3[p+(1-p)\sigma^4]}{[p+(1-p)\sigma^2]^2} $$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
